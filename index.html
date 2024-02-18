@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+            color: #333;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        input[type="submit"],
+        input[type="button"],
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            height: 46px; /* Set height */
+        }
+        input[type="submit"]:hover,
+        input[type="button"]:hover,
+        button:hover {
+            background-color: #0056b3;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            background-color: #f9f9f9;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        li:last-child {
+            border-bottom: none;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .github-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            height: 46px; /* Set height */
+        }
+        .github-btn img {
+            width: 30px;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="font-size: 90px; font-family: cursive; color: #007bff;">Pass Gen</h1>
+        <h1>Password Generator</h1>
+        <form id="passwordForm">
+            <label for="input_words">Enter a list of words separated by spaces:</label><br>
+            <input type="text" id="input_words" name="input_words" required><br><br>
+            <input type="submit" value="Generate Passwords">
+            <input type="button" id="downloadButton" value="Download" onclick="downloadPasswords()">
+            <button class="github-btn" onclick="goToGitHub()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub Logo">
+                GitHub
+            </button>
+        </form>
+        <div id="passwords"></div>
+        <div class="loading" id="loading">Loading...</div>
+    </div>
+
+    <script>
+        document.getElementById('passwordForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            document.getElementById('loading').style.display = 'block';
+            var inputWords = document.getElementById('input_words').value.split(' ');
+            var passwordList = generatePasswordList(inputWords);
+            setTimeout(function() {
+                document.getElementById('loading').style.display = 'none';
+                displayPasswords(passwordList);
+            }, 5000);
+        });
+
+        function generatePasswordList(words) {
+            var passwordList = [];
+
+            function permute(permutation, remainingWords) {
+                if (remainingWords.length === 0) {
+                    passwordList.push(permutation.join(' '));
+                } else {
+                    for (var i = 0; i < remainingWords.length; i++) {
+                        var newPermutation = permutation.concat(remainingWords[i]);
+                        var newRemainingWords = remainingWords.slice(0, i).concat(remainingWords.slice(i + 1));
+                        permute(newPermutation, newRemainingWords);
+                    }
+                }
+            }
+
+            permute([], words);
+
+            return passwordList;
+        }
+
+        function displayPasswords(passwords) {
+            var passwordsDiv = document.getElementById('passwords');
+            passwordsDiv.innerHTML = '<h2>Passwords Generated</h2><ul>';
+            for (var i = 0; i < passwords.length; i++) {
+                passwordsDiv.innerHTML += '<li>' + passwords[i] + '</li>';
+            }
+            passwordsDiv.innerHTML += '</ul>';
+        }
+
+        function downloadPasswords() {
+            document.getElementById('loading').style.display = 'block';
+            setTimeout(function() {
+                var passwords = document.getElementById('passwords').innerText;
+                var blob = new Blob([passwords], { type: 'text/plain' });
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'Passwords.txt';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.getElementById('loading').style.display = 'none';
+            }, 5000);
+        }
+
+        function goToGitHub() {
+            window.open("https://github.com/CodeWithVedang", "_blank");
+        }
+    </script>
+</body>
+</html>
