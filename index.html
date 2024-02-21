@@ -80,11 +80,6 @@
         li:last-child {
             border-bottom: none;
         }
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
         .github-btn {
             display: inline-block;
             padding: 10px 20px;
@@ -100,6 +95,13 @@
             width: 30px;
             vertical-align: middle;
             margin-right: 10px;
+        }
+
+        /* New styles for the progress bar */
+        progress {
+            width: 100%;
+            height: 30px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -118,19 +120,35 @@
             </button>
         </form>
         <div id="passwords"></div>
-        <div class="loading" id="loading">Loading...</div>
+        <!-- Progress bar -->
+        <progress id="progressBar" value="0" max="100"></progress>
     </div>
 
     <script>
         document.getElementById('passwordForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            document.getElementById('loading').style.display = 'block';
+            document.getElementById('progressBar').value = 0; // Reset progress bar
+            document.getElementById('progressBar').style.display = 'block'; // Show progress bar
             var inputWords = document.getElementById('input_words').value.split(' ');
             var passwordList = generatePasswordList(inputWords);
-            setTimeout(function() {
-                document.getElementById('loading').style.display = 'none';
-                displayPasswords(passwordList);
-            }, 5000);
+            var totalIterations = passwordList.length;
+            var completedIterations = 0;
+
+            function updateProgressBar() {
+                completedIterations++;
+                var progress = Math.round((completedIterations / totalIterations) * 100);
+                document.getElementById('progressBar').value = progress;
+            }
+
+            var interval = setInterval(function() {
+                if (completedIterations >= totalIterations) {
+                    clearInterval(interval);
+                    document.getElementById('progressBar').style.display = 'none'; // Hide progress bar when done
+                    displayPasswords(passwordList);
+                } else {
+                    updateProgressBar();
+                }
+            }, 50);
         });
 
         function generatePasswordList(words) {
